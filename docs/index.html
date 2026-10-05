@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nepal Peer Dashboard</title>
+<meta name="description" content="Nepal compared with South Asian and structural peers on macro, structural, education and socioeconomic indicators, 2004 to latest.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/3.3.1/plotly.min.js"></script>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10); --chip: #f0efec; --chip-on: #e6e5df;
+  --nepal: #0b0b0b; --region: #898781;
+  --c-BGD: #2a78d6; --c-BTN: #eb6834; --c-IND: #1baf7a; --c-PAK: #eda100;
+  --c-LKA: #e87ba4; --c-VNM: #008300; --c-KHM: #4a3aa7; --c-LAO: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10); --chip: #262625; --chip-on: #383835;
+    --nepal: #ffffff; --region: #898781;
+    --c-BGD: #3987e5; --c-BTN: #d95926; --c-IND: #199e70; --c-PAK: #c98500;
+    --c-LKA: #d55181; --c-VNM: #008300; --c-KHM: #9085e9; --c-LAO: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10); --chip: #262625; --chip-on: #383835;
+  --nepal: #ffffff; --region: #898781;
+  --c-BGD: #3987e5; --c-BTN: #d95926; --c-IND: #199e70; --c-PAK: #c98500;
+  --c-LKA: #d55181; --c-VNM: #008300; --c-KHM: #9085e9; --c-LAO: #e66767;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: inherit; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 24px 16px 48px; }
+header h1 { font-size: 24px; margin: 0 0 4px; font-weight: 650; letter-spacing: -.01em; }
+header p { margin: 0; color: var(--ink-2); max-width: 820px; }
+.meta { color: var(--muted); font-size: 13px; margin-top: 6px; }
+
+.controls { position: sticky; top: 0; z-index: 5; background: var(--page); padding: 12px 0 10px; border-bottom: 1px solid var(--grid); margin-top: 18px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.row + .row { margin-top: 8px; }
+.label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-right: 2px; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; background: var(--chip); border: 1px solid transparent; color: var(--ink); cursor: pointer; font: inherit; font-size: 13.5px; user-select: none; }
+.chip:hover { border-color: var(--border); }
+.chip[aria-pressed="true"] { background: var(--chip-on); border-color: var(--border); }
+.chip[aria-pressed="false"] { color: var(--muted); }
+.chip[aria-pressed="false"] .key { opacity: .35; }
+.chip[disabled] { cursor: default; }
+.key { width: 16px; height: 0; border-top: 2px solid var(--kc, currentColor); display: inline-block; }
+.key.nepal { border-top-width: 3px; }
+.key.dash { border-top-style: dashed; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 13.5px; padding: 5px 12px; background: var(--surface); color: var(--muted); border: 0; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { color: var(--ink); background: var(--chip-on); font-weight: 600; }
+.spacer { flex: 1; }
+.btn { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); cursor: pointer; text-decoration: none; }
+
+.tabs { display: flex; gap: 4px; margin: 18px 0 14px; border-bottom: 1px solid var(--grid); flex-wrap: wrap; }
+.tabs button { font: inherit; font-size: 14.5px; padding: 9px 14px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; margin-bottom: -1px; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr)); gap: 14px; }
+@media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 14px 10px; min-width: 0; }
+.card h3 { margin: 0; font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.card h3 small { color: var(--muted); font-weight: 400; font-size: 12.5px; white-space: nowrap; }
+.stat { display: flex; gap: 14px; margin: 6px 0 2px; color: var(--ink-2); font-size: 13px; flex-wrap: wrap; }
+.stat b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.plot { height: 290px; width: 100%; }
+.foot { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 12px; margin-top: 4px; align-items: center; }
+.foot button { font: inherit; font-size: 12px; background: none; border: 0; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 0; }
+.tbl { display: none; max-height: 290px; overflow: auto; font-size: 12.5px; }
+.tbl table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.tbl th, .tbl td { padding: 3px 6px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+.tbl th:first-child, .tbl td:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); }
+.tbl thead th { position: sticky; top: 0; background: var(--surface); color: var(--muted); font-weight: 500; }
+.card.table .plot { display: none; } .card.table .tbl { display: block; }
+.empty { color: var(--muted); font-size: 13px; padding: 40px 0; text-align: center; }
+footer { margin-top: 32px; color: var(--muted); font-size: 12.5px; max-width: 900px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Nepal and its peers, 2004 to today</h1>
+  <p>High-level indicators for Nepal against South Asian neighbours, structural peers in Southeast Asia, and the World Bank South Asia aggregate. Switch peers on and off, and toggle between levels and an index with 2004 = 100.</p>
+  <div class="meta" id="meta"></div>
+</header>
+
+<div class="controls">
+  <div class="row" id="peerRow"><span class="label">Countries</span></div>
+  <div class="row">
+    <span class="label">View</span>
+    <div class="seg" id="viewSeg">
+      <button aria-pressed="true" data-view="level">Levels</button>
+      <button aria-pressed="false" data-view="index">Index 2004 = 100</button>
+    </div>
+    <span class="spacer"></span>
+    <a class="btn" href="data/indicators.json" download>Download JSON</a>
+    <button class="btn" id="themeBtn" type="button">Dark mode</button>
+  </div>
+</div>
+
+<div class="tabs" role="tablist" id="tabs"></div>
+<div class="grid" id="grid"></div>
+
+<footer id="footer"></footer>
+</div>
+
+<script>
+(async function () {
+  const data = await fetch('data/indicators.json').then(r => r.json());
+  const C = data.countries, R = data.region, META = data.meta, S = data.series;
+  const PEERS = Object.keys(C).filter(k => k !== 'NPL');
+  const state = { on: new Set(Object.keys(C).concat(Object.keys(R))), view: 'level', group: 'macro' };
+  try { const v = localStorage.getItem('npl-dash'); if (v) { const o = JSON.parse(v); if (o.on) state.on = new Set(o.on); if (o.view) state.view = o.view; if (o.group) state.group = o.group; } } catch (e) {}
+  const h = location.hash.replace('#','').split('&'); if (h[0] && data.groups[h[0]]) state.group = h[0]; if (h.includes('index')) state.view = 'index';
+  const save = () => { try { localStorage.setItem('npl-dash', JSON.stringify({ on: [...state.on], view: state.view, group: state.group })); } catch (e) {} };
+
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const colorOf = iso => iso === 'NPL' ? css('--nepal') : iso === 'SAS' ? css('--region') : css('--c-' + iso);
+  const nameOf = iso => C[iso] || R[iso];
+  const INDEXABLE = /(\$|years|kWh|per 100|persons|per 1,000|index|scale|score|births)/i;
+  const indexable = key => INDEXABLE.test(META[key].unit) && !/rank/i.test(META[key].unit) && !/^(net_migration|gov_balance|ca_gdp)$/.test(key);
+
+  document.getElementById('meta').textContent = `Data pulled ${data.generated}. Sources: World Bank WDI, IMF WEO and Fiscal Monitor, UNDP HDR 2025, Growth Lab Atlas. Hover a chart for all values in a year.`;
+
+  // ---- peer chips
+  const peerRow = document.getElementById('peerRow');
+  const mkChip = (iso, cls) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.iso = iso;
+    b.setAttribute('aria-pressed', String(state.on.has(iso)));
+    const k = document.createElement('span'); k.className = 'key ' + cls; k.style.setProperty('--kc', colorOf(iso));
+    b.append(k, document.createTextNode(nameOf(iso)));
+    if (iso === 'NPL') { b.disabled = true; b.setAttribute('aria-pressed', 'true'); }
+    else b.addEventListener('click', () => { state.on.has(iso) ? state.on.delete(iso) : state.on.add(iso); b.setAttribute('aria-pressed', String(state.on.has(iso))); save(); render(); });
+    peerRow.appendChild(b);
+  };
+  mkChip('NPL', 'nepal'); PEERS.forEach(p => mkChip(p, '')); mkChip('SAS', 'dash');
+
+  // ---- view toggle
+  const viewSeg = document.getElementById('viewSeg');
+  const syncView = () => viewSeg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)));
+  viewSeg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.view = b.dataset.view; syncView(); save(); render(); });
+  syncView();
+
+  // ---- theme
+  const themeBtn = document.getElementById('themeBtn');
+  const isDark = () => document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  const syncTheme = () => themeBtn.textContent = isDark() ? 'Light mode' : 'Dark mode';
+  try { const t = localStorage.getItem('npl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  themeBtn.addEventListener('click', () => { document.documentElement.dataset.theme = isDark() ? 'light' : 'dark'; try { localStorage.setItem('npl-theme', document.documentElement.dataset.theme); } catch (e) {} syncTheme(); peerRow.querySelectorAll('.chip').forEach(b => b.querySelector('.key').style.setProperty('--kc', colorOf(b.dataset.iso))); render(); });
+  syncTheme();
+
+  // ---- tabs
+  const tabs = document.getElementById('tabs');
+  Object.entries(data.groups).forEach(([g, label]) => {
+    const b = document.createElement('button'); b.role = 'tab'; b.textContent = label; b.dataset.group = g;
+    b.addEventListener('click', () => { state.group = g; history.replaceState(null, '', '#' + g); syncTabs(); save(); render(true); });
+    tabs.appendChild(b);
+  });
+  const syncTabs = () => tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.group === state.group)));
+  syncTabs();
+
+  // ---- helpers
+  const fmt = (v, unit) => {
+    if (v == null || isNaN(v)) return '';
+    const a = Math.abs(v);
+    if (/persons/.test(unit)) return Math.round(v).toLocaleString('en-US');
+    if (a >= 1000) return Math.round(v).toLocaleString('en-US');
+    if (a >= 100) return v.toFixed(0);
+    if (a >= 10) return v.toFixed(1);
+    return v.toFixed(2);
+  };
+  const toIndex = obj => {
+    const yrs = Object.keys(obj).map(Number).sort((a, b) => a - b);
+    const base = yrs.find(y => y >= data.start_year && y <= data.start_year + 3 && obj[y] !== 0);
+    if (base == null) return { pts: {}, base: null };
+    const out = {}; yrs.forEach(y => out[y] = obj[y] / obj[base] * 100);
+    return { pts: out, base };
+  };
+
+  // ---- render
+  const grid = document.getElementById('grid');
+  const cards = new Map();
+  function render(rebuild) {
+    const keys = data.order.filter(k => META[k].group === state.group);
+    if (rebuild || grid.dataset.group !== state.group) { grid.innerHTML = ''; cards.clear(); grid.dataset.group = state.group; }
+    const dark = isDark();
+    const showIsos = ['NPL', ...PEERS.filter(p => state.on.has(p)), ...(state.on.has('SAS') ? ['SAS'] : [])];
+
+    keys.forEach(key => {
+      const m = META[key], ser = S[key] || {};
+      let card = cards.get(key);
+      if (!card) {
+        card = document.createElement('section'); card.className = 'card';
+        card.innerHTML = `<h3><span class="t"></span><small class="u"></small></h3><div class="stat"></div><div class="plot"></div><div class="tbl"></div><div class="foot"><span class="src"></span><button type="button" class="tbtn">Table</button></div>`;
+        card.querySelector('.t').textContent = m.label;
+        card.querySelector('.u').textContent = m.unit;
+        card.querySelector('.src').textContent = m.source + (m.code && !/csv/.test(m.code) ? ' · ' + m.code : '') + (m.note ? ' · ' + m.note : '');
+        card.querySelector('.tbtn').addEventListener('click', () => { card.classList.toggle('table'); card.querySelector('.tbtn').textContent = card.classList.contains('table') ? 'Chart' : 'Table'; });
+        grid.appendChild(card); cards.set(key, card);
+      }
+      const plot = card.querySelector('.plot'), stat = card.querySelector('.stat'), tbl = card.querySelector('.tbl');
+      const useIndex = state.view === 'index' && indexable(key);
+      const hasData = Object.keys(ser).length > 0;
+      if (!hasData) { plot.innerHTML = `<div class="empty">No data yet. ${/csv/.test(m.code) ? 'Add data/manual/' + m.code + ' and rerun the pull script.' : ''}</div>`; stat.textContent = ''; tbl.innerHTML = ''; return; }
+
+      // traces
+      const traces = []; let baseNote = '';
+      const years = new Set();
+      showIsos.forEach(iso => {
+        let obj = ser[iso]; if (!obj) return;
+        if (useIndex) { const r = toIndex(obj); obj = r.pts; if (iso === 'NPL' && r.base) baseNote = r.base; }
+        const xs = Object.keys(obj).map(Number).sort((a, b) => a - b); if (!xs.length) return;
+        xs.forEach(y => years.add(y));
+        const sparse = xs.length <= 6;
+        traces.push({
+          x: xs, y: xs.map(y => obj[y]), name: nameOf(iso), type: 'scatter',
+          mode: sparse ? 'lines+markers' : 'lines',
+          line: { color: colorOf(iso), width: iso === 'NPL' ? 3 : 1.75, dash: iso === 'SAS' ? 'dash' : 'solid', shape: 'linear' },
+          marker: { size: 8, color: colorOf(iso), line: { width: 2, color: css('--surface') } },
+          connectgaps: true,
+          hovertemplate: '<b>%{y:,.4~r}</b> ' + nameOf(iso) + '<extra></extra>',
+          opacity: iso === 'NPL' ? 1 : 0.9,
+        });
+      });
+      // Nepal on top
+      traces.push(traces.splice(traces.findIndex(t => t.name === 'Nepal'), 1)[0]);
+
+      const ink = css('--ink'), muted = css('--muted'), gridc = css('--grid'), axis = css('--axis'), surf = css('--surface');
+      const layout = {
+        margin: { l: 48, r: 12, t: 8, b: 36 }, paper_bgcolor: surf, plot_bgcolor: surf,
+        font: { family: 'system-ui, -apple-system, "Segoe UI", sans-serif', size: 12, color: muted },
+        showlegend: false, hovermode: 'x unified',
+        hoverlabel: { bgcolor: surf, bordercolor: axis, font: { color: ink, size: 12 } },
+        xaxis: { showgrid: false, zeroline: false, linecolor: axis, tickcolor: axis, dtick: 4, tickformat: 'd', range: [data.start_year - 0.5, Math.max(...years) + 0.5], showspikes: true, spikemode: 'across', spikethickness: 1, spikecolor: axis, spikedash: 'solid' },
+        yaxis: { gridcolor: gridc, zeroline: true, zerolinecolor: axis, zerolinewidth: 1, linecolor: 'rgba(0,0,0,0)', tickformat: ',.4~r', automargin: true, title: useIndex ? { text: 'Index, ' + (baseNote || data.start_year) + ' = 100', font: { size: 11 } } : undefined, fixedrange: true },
+        annotations: [],
+      };
+      if (state.view === 'index' && !indexable(key)) { layout.margin.t = 26; layout.annotations.push({ text: 'Index view not applicable to this measure; showing levels', xref: 'paper', yref: 'paper', x: 0, y: 1, yshift: 14, showarrow: false, font: { size: 11, color: muted }, xanchor: 'left', yanchor: 'bottom' }); }
+      Plotly.react(plot, traces, layout, { displayModeBar: false, responsive: true });
+
+      // stat line: Nepal latest + rank among shown countries in that year
+      const npl = ser.NPL || {}; const nyrs = Object.keys(npl).map(Number);
+      stat.innerHTML = '';
+      if (nyrs.length) {
+        const ly = Math.max(...nyrs); const lv = npl[ly];
+        const fy = Math.min(...nyrs.filter(y => y >= data.start_year)); const fv = npl[fy];
+        const comp = showIsos.filter(i => i !== 'SAS' && ser[i] && ser[i][ly] != null).map(i => [i, ser[i][ly]]).sort((a, b) => b[1] - a[1]);
+        const rank = comp.findIndex(x => x[0] === 'NPL') + 1;
+        const chg = fy < ly ? lv - fv : null;
+        const sa = ser.SAS && ser.SAS[ly];
+        const items = [`Nepal ${ly}: <b>${fmt(lv, m.unit)}</b>`];
+        if (chg != null) items.push(`${fy} to ${ly}: <b>${chg >= 0 ? '+' : '−'}${fmt(Math.abs(chg), m.unit)}</b>`);
+        if (rank && comp.length > 1) items.push(`Rank <b>${rank}</b> of ${comp.length} shown`);
+        if (sa != null) items.push(`South Asia: <b>${fmt(sa, m.unit)}</b>`);
+        stat.innerHTML = items.map(s => `<span>${s}</span>`).join('');
+      }
+
+      // table
+      const ys = [...years].sort((a, b) => a - b);
+      const t = document.createElement('table'); const th = document.createElement('tr');
+      th.appendChild(Object.assign(document.createElement('th'), { textContent: 'Year' }));
+      showIsos.forEach(i => th.appendChild(Object.assign(document.createElement('th'), { textContent: nameOf(i) })));
+      t.appendChild(Object.assign(document.createElement('thead'), {})).appendChild(th);
+      const tb = document.createElement('tbody');
+      ys.forEach(y => { const tr = document.createElement('tr'); tr.appendChild(Object.assign(document.createElement('td'), { textContent: y })); showIsos.forEach(i => { let v = ser[i] && ser[i][y]; if (useIndex && v != null) v = toIndex(ser[i]).pts[y]; tr.appendChild(Object.assign(document.createElement('td'), { textContent: v == null ? '' : fmt(v, m.unit) })); }); tb.appendChild(tr); });
+      t.appendChild(tb); tbl.innerHTML = ''; tbl.appendChild(t);
+    });
+  }
+  render(true);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { syncTheme(); render(); });
+
+  document.getElementById('footer').innerHTML = `<p>Peers: Bangladesh, Bhutan, India, Pakistan and Sri Lanka as South Asian neighbours; Vietnam, Cambodia and Lao PDR as structural peers that grew from a similar starting point. The dashed line is the World Bank South Asia aggregate; where a source has no regional aggregate (IMF, UNDP) a GDP- or population-weighted mean of SAARC members is shown instead. Survey-based series (poverty, inequality, literacy, Human Capital Index) appear as markers in survey years only. Index view rebases each country to 100 in 2004, or the first year available up to 2007.</p><p>Built by the Harvard Growth Lab Nepal team. Code and data: <a href="https://github.com/lucaslamby-gl/nepal-peer-dashboard">github.com/lucaslamby-gl/nepal-peer-dashboard</a>.</p>`;
+})();
+</script>
+</body>
+</html>
